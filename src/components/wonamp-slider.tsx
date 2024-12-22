@@ -2,11 +2,11 @@ import * as SliderPrimitive from "@radix-ui/react-slider"
 import { cn } from "@/lib/utils"
 import { forwardRef } from "react"
 
-interface WinampSliderProps extends React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root> {
+interface WonampSliderProps extends React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root> {
   orientation?: "horizontal" | "vertical"
 }
 
-const WinampSlider = forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, WinampSliderProps>(
+const WonampSlider = forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, WonampSliderProps>(
   ({ className, orientation = "horizontal", ...props }, ref) => {
     return (
       <SliderPrimitive.Root
@@ -38,7 +38,7 @@ const WinampSlider = forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, W
     )
   }
 )
-WinampSlider.displayName = "WinampSlider"
+WonampSlider.displayName = "WonampSlider"
 
-export { WinampSlider }
+export { WonampSlider }
 

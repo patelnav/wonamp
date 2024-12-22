@@ -1,12 +1,12 @@
 import { cn } from "@/lib/utils"
 import { ButtonHTMLAttributes, forwardRef } from "react"
 
-interface WinampButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface WonampButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "control" | "text"
   size?: "sm" | "md" | "lg"
 }
 
-const WinampButton = forwardRef<HTMLButtonElement, WinampButtonProps>(
+const WonampButton = forwardRef<HTMLButtonElement, WonampButtonProps>(
   ({ className, variant = "primary", size = "md", ...props }, ref) => {
     return (
       <button
@@ -31,7 +31,7 @@ const WinampButton = forwardRef<HTMLButtonElement, WinampButtonProps>(
     )
   }
 )
-WinampButton.displayName = "WinampButton"
+WonampButton.displayName = "WonampButton"
 
-export { WinampButton }
+export { WonampButton }
 

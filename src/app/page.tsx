@@ -4,11 +4,13 @@ import { Playlist } from "@/components/playlist"
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gray-900 p-4 flex flex-col items-center justify-center">
-      <div className="w-full max-w-2xl">
+    <main className="h-screen bg-gray-900 flex flex-col">
+      <div className="w-full max-w-[1200px] mx-auto flex flex-col flex-grow">
         <TitleBar />
-        <Player />
-        <Playlist />
+        <div className="flex flex-col flex-grow">
+          <Player />
+          <Playlist />
+        </div>
       </div>
     </main>
   )

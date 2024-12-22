@@ -1,22 +1,22 @@
 "use client"
 
-import { WinampSlider } from "./winamp-slider"
-import { Visualization } from "./visualization"
+import { WonampSlider } from "@/components/wonamp-slider"
+import { Visualization } from "@/components/visualization"
 import { Play, Pause, SkipBack, SkipForward, Square, Shuffle, Repeat } from 'lucide-react'
 
 export function Player() {
   return (
-    <div className="w-full bg-[#3B3B4F]">
+    <div className="w-full bg-[#3B3B4F] flex-grow">
       {/* Top border with double gold lines */}
       <div className="h-[4px] flex flex-col gap-[2px] px-1 bg-[#3B3B4F]">
         <div className="h-[1px] bg-[#8B7355]" />
         <div className="h-[1px] bg-[#8B7355]" />
       </div>
 
-      <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
         {/* Left section */}
-        <div className="space-y-2">
-          <div className="bg-black border border-[#282833] p-1">
+        <div className="space-y-2 flex flex-col">
+          <div className="bg-black border border-[#282833] p-1 flex-grow flex flex-col">
             <Visualization />
             <div className="flex justify-between items-center mt-2 text-[#00FF00] font-mono text-sm">
               <div className="text-xl tabular-nums">00:04</div>
@@ -29,13 +29,13 @@ export function Player() {
         </div>
 
         {/* Right section */}
-        <div className="space-y-2">
+        <div className="space-y-2 flex flex-col">
           <div className="bg-black border border-[#282833] p-2 text-[#00FF00] font-mono">
             <span className="opacity-70">4.</span> Track 3 <span className="opacity-70">(5:04)</span>
           </div>
           <div className="flex items-center gap-2 bg-[#282833] p-2 border border-[#1D1D29]">
             <div className="flex-1">
-              <WinampSlider
+              <WonampSlider
                 defaultValue={[75]}
                 max={100}
                 step={1}
@@ -46,6 +46,7 @@ export function Player() {
               stereo
             </div>
           </div>
+          <div className="flex-grow bg-black border border-[#282833]"></div>
         </div>
       </div>
 

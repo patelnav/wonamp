@@ -12,6 +12,14 @@ export function Visualization() {
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
+    const resizeCanvas = () => {
+      canvas.width = canvas.offsetWidth
+      canvas.height = canvas.offsetHeight
+    }
+
+    resizeCanvas()
+    window.addEventListener('resize', resizeCanvas)
+
     // Set up the visualization
     const draw = () => {
       ctx.fillStyle = "#000000"
@@ -31,7 +39,7 @@ export function Visualization() {
       ctx.beginPath()
       ctx.moveTo(0, canvas.height / 2)
       for (let x = 0; x < canvas.width; x++) {
-        const y = canvas.height / 2 + Math.sin(x * 0.05 + Date.now() * 0.005) * 20
+        const y = canvas.height / 2 + Math.sin(x * 0.05 + Date.now() * 0.005) * (canvas.height / 4)
         ctx.lineTo(x, y)
       }
       ctx.stroke()
@@ -40,14 +48,16 @@ export function Visualization() {
     }
 
     draw()
+
+    return () => {
+      window.removeEventListener('resize', resizeCanvas)
+    }
   }, [])
 
   return (
     <canvas
       ref={canvasRef}
-      width={200}
-      height={60}
-      className="w-full bg-black"
+      className="w-full h-full bg-black"
     />
   )
 }

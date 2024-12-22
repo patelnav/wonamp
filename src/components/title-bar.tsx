@@ -19,7 +19,7 @@ export function TitleBar() {
           <div className="h-[1px] bg-[#8B7355]" />
         </div>
 
-        {/* WINAMP text */}
+        {/* WONAMP text */}
         <div className="px-2 font-bold text-xs tracking-wider text-[#8B8B9F]">
           WONAMP
         </div>
