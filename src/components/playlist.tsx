@@ -24,7 +24,7 @@ const SAMPLE_TRACKS: Track[] = [
 
 export function Playlist() {
   return (
-    <div className="w-full bg-[#3B3B4F] flex flex-col flex-grow">
+    <div className="w-full h-full bg-[#3B3B4F]">
       {/* Title bar with double gold lines */}
       <div className="relative h-[20px] flex items-center justify-center">
         <div className="absolute inset-x-1 top-[8px] flex flex-col gap-[2px]">
@@ -37,7 +37,7 @@ export function Playlist() {
       </div>
 
       {/* Playlist content */}
-      <div className="bg-black border border-[#282833] m-4 flex-grow flex flex-col">
+      <div className="bg-black border border-[#282833] m-4 h-[calc(100%-28px)] flex flex-col">
         <div className="flex-grow overflow-auto">
           {SAMPLE_TRACKS.map((track) => (
             <div
