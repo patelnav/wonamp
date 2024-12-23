@@ -9,7 +9,7 @@ interface SongListProps {
 
 export function SongList({ songs, onSongClick }: SongListProps) {
   return (
-    <div className="flex-grow bg-black p-2 overflow-y-auto min-h-0">
+    <div className="h-full bg-black p-2 overflow-y-auto">
       {songs.length === 0 ? (
         <div className="h-full bg-black" />
       ) : (
