@@ -13,9 +13,13 @@ export function Player() {
       <div className="flex-1 p-4 flex flex-col md:flex-row gap-4 min-h-0">
         {/* Left section */}
         <div className="flex flex-col space-y-2 flex-1 min-h-0">
-          <div className="bg-black border border-wonamp-border p-1 flex-grow flex flex-col relative min-h-0">
-            <Visualization />
-            <TrackInfo />
+          <div className="bg-black border border-wonamp-border p-1 flex flex-col relative min-h-0">
+            <div className="flex-1 min-h-0">
+              <Visualization />
+            </div>
+            <div className="flex-none">
+              <TrackInfo />
+            </div>
           </div>
         </div>
 
@@ -30,12 +34,12 @@ export function Player() {
       </div>
 
       {/* Controls section - fixed height */}
-      <div className="flex-none px-4 pb-4">
+      <div className="flex-none p-4">
         <TransportControls />
       </div>
 
       {/* Input section - fixed height */}
-      <div className="flex-none pb-4">
+      <div className="flex-none p-4">
         <InputModes />
       </div>
     </div>
