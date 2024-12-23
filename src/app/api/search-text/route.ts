@@ -24,10 +24,12 @@ const songLineSchema = z.string()
   })
 
 export async function POST(request: Request): Promise<NextResponse<{ error: string } | Song[]>> {
+  console.log('[Search Text] Starting new search request')
   try {
     // Parse and validate request body
     const body = await request.json()
     const { text } = requestSchema.parse(body)
+    console.log(`[Search Text] Received text of length: ${text.length} characters`)
 
     // Split text into lines and filter empty lines
     const songLines = text
@@ -36,24 +38,33 @@ export async function POST(request: Request): Promise<NextResponse<{ error: stri
       .filter((line: string) => line.length > 0)
       .slice(0, MAX_SONG_COUNT) // Limit number of songs
 
+    console.log(`[Search Text] Found ${songLines.length} non-empty lines`)
+
     // Validate each line
     const validSongLines = songLines
       .map((line: string) => {
         try {
           return songLineSchema.parse(line)
         } catch {
+          console.log(`[Search Text] Invalid song line: "${line}"`)
           return null
         }
       })
       .filter((line): line is string => line !== null)
 
+    console.log(`[Search Text] ${validSongLines.length} lines passed validation`)
+
     // Process songs in parallel with rate limiting
+    console.log('[Search Text] Starting parallel song processing')
     const results = await Promise.all(
-      validSongLines.map(async (line: string) => {
+      validSongLines.map(async (line: string, index: number) => {
         try {
+          console.log(`[Search Text] Processing line ${index + 1}/${validSongLines.length}: "${line}"`)
           const youtubeResult = await searchYouTube(line)
+
           // Split line into artist and title if possible
           const [artist = '', songTitle = line] = line.split('-').map((s: string) => s.trim())
+          console.log(`[Search Text] Line ${index + 1} parsed - Artist: "${artist}", Title: "${songTitle}"`)
 
           const song: Song = {
             id: generateSongID(artist, songTitle),
@@ -63,9 +74,11 @@ export async function POST(request: Request): Promise<NextResponse<{ error: stri
             youtubeTitle: youtubeResult?.title,
             duration: youtubeResult?.duration
           }
+
+          console.log(`[Search Text] Line ${index + 1} processed successfully${youtubeResult ? ' with' : ' without'} YouTube match`)
           return song
         } catch (error) {
-          console.error(`Error processing line "${line}":`, error)
+          console.error(`[Search Text] Error processing line "${line}":`, error)
           return null
         }
       })
@@ -73,10 +86,11 @@ export async function POST(request: Request): Promise<NextResponse<{ error: stri
 
     // Filter out failed results
     const validResults = results.filter((result): result is Song => result !== null)
+    console.log(`[Search Text] Search completed. ${validResults.length}/${results.length} songs processed successfully`)
 
     return NextResponse.json(validResults)
   } catch (error) {
-    console.error('Error processing request:', error)
+    console.error('[Search Text] Error processing request:', error)
     return NextResponse.json(
       { error: 'Failed to process request' },
       { status: 400 }
