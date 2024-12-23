@@ -3,7 +3,6 @@
 import { Visualization } from "@/components/player/visualization"
 import { TrackInfo } from "@/components/player/track-info"
 import { TrackControls } from "@/components/player/track-controls"
-import { TransportControls } from "@/components/player/transport-controls"
 import { InputModes } from "@/components/input-modes"
 
 export function Player() {
@@ -31,10 +30,10 @@ export function Player() {
         </div>
       </div>
 
-      {/* Controls section - fixed height */}
+      {/* Controls section - fixed height 
       <div className="flex-none p-4">
         <TransportControls />
-      </div>
+      </div>*/}
 
       {/* Input section - fixed height */}
       <div className="flex-none p-4">
