@@ -4,21 +4,29 @@ import { useEffect, useRef } from "react"
 
 export function Visualization() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const barsRef = useRef<number[]>([])
+  const targetHeightsRef = useRef<number[]>([])
 
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas) return
+    const container = containerRef.current
+    if (!canvas || !container) return
 
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
-    const resizeCanvas = () => {
-      canvas.width = canvas.offsetWidth
-      canvas.height = canvas.offsetHeight
-    }
+    const observer = new ResizeObserver(() => {
+      canvas.width = container.clientWidth
+      canvas.height = container.clientHeight
+    })
 
-    resizeCanvas()
-    window.addEventListener('resize', resizeCanvas)
+    observer.observe(container)
+
+    // Initialize bars
+    const NUM_BARS = 16
+    barsRef.current = new Array(NUM_BARS).fill(0)
+    targetHeightsRef.current = new Array(NUM_BARS).fill(0)
 
     // Set up the visualization
     const draw = () => {
@@ -27,38 +35,62 @@ export function Visualization() {
 
       // Draw grid
       ctx.strokeStyle = "#1A1A1A"
-      const gridSize = 10
+      const gridSize = 4
       for (let x = 0; x < canvas.width; x += gridSize) {
         for (let y = 0; y < canvas.height; y += gridSize) {
           ctx.strokeRect(x, y, gridSize, gridSize)
         }
       }
 
-      // Simulate waveform
-      ctx.strokeStyle = "#00FF00"
-      ctx.beginPath()
-      ctx.moveTo(0, canvas.height / 2)
-      for (let x = 0; x < canvas.width; x++) {
-        const y = canvas.height / 2 + Math.sin(x * 0.05 + Date.now() * 0.005) * (canvas.height / 4)
-        ctx.lineTo(x, y)
+      // Update bar heights
+      const barWidth = Math.floor(canvas.width / NUM_BARS)
+      const maxBarHeight = canvas.height * 0.8
+
+      // Randomly update target heights
+      if (Math.random() < 0.1) {
+        targetHeightsRef.current = targetHeightsRef.current.map(() =>
+          Math.random() * maxBarHeight
+        )
       }
-      ctx.stroke()
+
+      // Animate bars towards target heights
+      barsRef.current = barsRef.current.map((height, i) => {
+        const target = targetHeightsRef.current[i]
+        const diff = target - height
+        return height + diff * 0.1
+      })
+
+      // Draw bars
+      ctx.fillStyle = "#00FF00"
+      barsRef.current.forEach((height, i) => {
+        const x = i * barWidth
+        const barHeight = Math.max(2, height) // Minimum height of 2px
+        const y = canvas.height - barHeight
+
+        // Draw segments
+        const segmentHeight = 2
+        const numSegments = Math.floor(barHeight / (segmentHeight + 1))
+        for (let j = 0; j < numSegments; j++) {
+          const segmentY = y + j * (segmentHeight + 1)
+          ctx.fillRect(x + 1, segmentY, barWidth - 2, segmentHeight)
+        }
+      })
 
       requestAnimationFrame(draw)
     }
 
     draw()
 
-    return () => {
-      window.removeEventListener('resize', resizeCanvas)
-    }
+    return () => observer.disconnect()
   }, [])
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="w-full h-full bg-black"
-    />
+    <div ref={containerRef} className="w-full h-full">
+      <canvas
+        ref={canvasRef}
+        className="w-full h-full"
+      />
+    </div>
   )
 }
 

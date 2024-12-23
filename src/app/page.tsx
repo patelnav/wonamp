@@ -9,10 +9,10 @@ export default function Home() {
         <div className="flex flex-col flex-grow">
           <TitleBar />
           <div className="flex flex-col lg:flex-row flex-grow">
-            <div className="h-[50%] lg:w-1/2">
+            <div className="h-[30%] lg:w-1/2">
               <Player />
             </div>
-            <div className="h-[50%] lg:w-1/2">
+            <div className="h-[70%] lg:w-1/2">
               <Playlist />
             </div>
           </div>
