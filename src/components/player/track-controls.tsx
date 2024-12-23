@@ -22,27 +22,35 @@ function DigitalDisplay({ value, unit, className }: DigitalDisplayProps) {
 
 interface SliderProps {
   value: number
-  onChange?: (value: number) => void
-  min?: number
-  max?: number
+  onChange: (value: number) => void
   color?: "red" | "green"
 }
 
-function MetallicSlider({ value, onChange, min = 0, max = 100, color = "red" }: SliderProps) {
+function MetallicSlider({ value, onChange, color = "red" }: SliderProps) {
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100))
+    onChange(Math.round(percentage))
+  }
+
   return (
-    <div className="relative h-[10px] bg-[#282833] border border-[#1D1D29]">
+    <div
+      className="relative h-[10px] bg-[#282833] border border-[#1D1D29] cursor-pointer"
+      onClick={handleClick}
+    >
       {/* Track */}
-      <div 
+      <div
         className={cn(
           "absolute h-full",
           color === "red" ? "bg-red-600" : "bg-[#00FF00]"
         )}
         style={{ width: `${value}%` }}
       />
-      
+
       {/* Handle */}
-      <div 
-        className="absolute top-1/2 -translate-y-1/2 w-[20px] h-[16px] cursor-pointer"
+      <div
+        className="absolute top-1/2 -translate-y-1/2 w-[20px] h-[16px]"
         style={{ left: `calc(${value}% - 10px)` }}
       >
         <div className="w-full h-full bg-gradient-to-b from-[#CCCCCC] to-[#888888] border border-[#1D1D29]">
@@ -102,30 +110,30 @@ export function TrackControls() {
       <div className="flex items-center gap-4">
         {/* Volume slider */}
         <div className="flex-1">
-          <MetallicSlider 
-            value={volume} 
-            onChange={setVolume} 
+          <MetallicSlider
+            value={volume}
+            onChange={setVolume}
             color="red"
           />
         </div>
 
         {/* Balance slider */}
         <div className="flex-1">
-          <MetallicSlider 
-            value={balance} 
-            onChange={setBalance} 
+          <MetallicSlider
+            value={balance}
+            onChange={setBalance}
             color="green"
           />
         </div>
 
         {/* Control buttons */}
-        <ControlButton 
+        <ControlButton
           active={isEqActive}
           onClick={() => setIsEqActive(!isEqActive)}
         >
           EQ
         </ControlButton>
-        <ControlButton 
+        <ControlButton
           active={isPlActive}
           onClick={() => setIsPlActive(!isPlActive)}
         >

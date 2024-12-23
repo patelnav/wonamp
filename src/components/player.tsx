@@ -5,6 +5,7 @@ import { Visualization } from "@/components/player/visualization"
 import { TrackInfo } from "@/components/player/track-info"
 import { TrackControls } from "@/components/player/track-controls"
 import { TransportControls } from "@/components/player/transport-controls"
+import { InputModes } from "@/components/input-modes"
 
 export function Player() {
   return (
@@ -12,8 +13,9 @@ export function Player() {
       <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
         {/* Left section */}
         <div className="space-y-2 flex flex-col">
-          <div className="bg-black border border-wonamp-border p-1 flex-grow flex flex-col">
+          <div className="bg-black border border-wonamp-border p-1 flex-grow flex flex-col relative">
             <Visualization />
+            <InputModes />
             <TrackInfo />
           </div>
         </div>

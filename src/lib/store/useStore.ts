@@ -1,13 +1,5 @@
 import { create } from 'zustand'
-
-type Song = {
-  id: string
-  artist: string
-  songTitle: string
-  youtubeLink?: string
-}
-
-type InputMode = 'image' | 'text' | 'voice'
+import { Song, InputMode } from '@/types/song'
 
 interface WonampState {
   // Current playlist state
