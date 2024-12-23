@@ -28,18 +28,16 @@ export function Playlist() {
   }
 
   return (
-    <div className="w-full h-full bg-wonamp-bg flex flex-col">
+    <div className="h-full flex flex-col bg-wonamp-bg">
       <PlaylistHeader />
-      <SongList songs={songs} onSongClick={handleSongClick} />
-      {/* <div className="flex-1 flex flex-col m-4">
-        <div className="flex-1 flex flex-col bg-black border border-wonamp-border min-h-0">
-        </div>
-      </div> */}
-      <PlaylistControls
-        songCount={songs.length}
-        onQuickPlaylist={handleQuickPlaylist}
-        hasSongs={songs.length > 0}
-      />
+      <div className="flex-grow p-2 m-2 flex flex-col">
+        <SongList songs={songs} onSongClick={handleSongClick} />
+        <PlaylistControls
+          songCount={songs.length}
+          onQuickPlaylist={handleQuickPlaylist}
+          hasSongs={songs.length > 0}
+        />
+      </div>
     </div>
   )
 }
