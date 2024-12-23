@@ -16,7 +16,7 @@ export function InputModes() {
   }
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+    <div className="flex items-center justify-center pointer-events-none">
       <div className="flex gap-4 pointer-events-auto">
         <button
           onClick={() => setShowTextDialog(true)}
