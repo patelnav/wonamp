@@ -8,7 +8,7 @@ export function PlaylistHeader() {
         <div className="h-[1px] bg-wonamp-gold" />
       </div>
       <div className="z-10 px-4 bg-wonamp-bg text-wonamp-text-muted text-xs font-bold">
-        WONAMP PLAYLIST
+        PLAYLIST
       </div>
     </div>
   )

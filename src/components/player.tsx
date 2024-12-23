@@ -1,6 +1,5 @@
 "use client"
 
-import { PlayerContainer } from "@/components/player/player-container"
 import { Visualization } from "@/components/player/visualization"
 import { TrackInfo } from "@/components/player/track-info"
 import { TrackControls } from "@/components/player/track-controls"
@@ -9,33 +8,39 @@ import { InputModes } from "@/components/input-modes"
 
 export function Player() {
   return (
-    <div className="h-full">
-      <PlayerContainer>
-        <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
-          {/* Left section */}
-          <div className="space-y-2 flex flex-col">
-            <div className="bg-black border border-wonamp-border p-1 flex-grow flex flex-col relative">
-              <Visualization />
-              <TrackInfo />
-            </div>
-          </div>
-
-          {/* Right section */}
-          <div className="space-y-2 flex flex-col">
-            <div className="bg-black border border-wonamp-border p-2 text-wonamp-text-green font-mono">
-              <span className="opacity-70">4.</span> Track 3 <span className="opacity-70">(5:04)</span>
-            </div>
-            <TrackControls />
-            <div className="flex-grow bg-black border border-wonamp-border"></div>
+    <div className="w-full h-full bg-wonamp-bg flex flex-col">
+      {/* Fun section - fills remaining space */}
+      <div className="flex-1 p-4 flex flex-col md:flex-row gap-4 min-h-0">
+        {/* Left section */}
+        <div className="flex flex-col space-y-2 flex-1 min-h-0">
+          <div className="bg-black border border-wonamp-border p-1 flex-grow flex flex-col relative min-h-0">
+            <Visualization />
+            <TrackInfo />
           </div>
         </div>
 
-        <div className="px-4 pb-4">
-          <TransportControls />
+        {/* Right section */}
+        <div className="flex flex-col space-y-2 flex-1 min-h-0">
+          <div className="bg-black border border-wonamp-border p-2 text-wonamp-text-green font-mono">
+            <span className="opacity-70">4.</span> Track 3 <span className="opacity-70">(5:04)</span>
+          </div>
+          <TrackControls />
+          <div className="flex-grow bg-black border border-wonamp-border min-h-0"></div>
         </div>
+      </div>
+
+      {/* Controls section - fixed height */}
+      <div className="flex-none px-4 pb-4">
+        <TransportControls />
+      </div>
+
+      {/* Input section - fixed height */}
+      <div className="flex-none pb-4">
         <InputModes />
-      </PlayerContainer>
+      </div>
     </div>
+
+
   )
 }
 
