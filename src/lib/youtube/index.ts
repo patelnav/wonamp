@@ -6,11 +6,12 @@ import type { YouTubeResult } from './types'
 import { ProxyManager } from './proxy'
 import { parseYouTubeHtml } from './parser'
 
-// Construct the blob URL based on the store URL
+// Configuration
 const BLOB_STORE_URL = process.env.BLOB_STORE_URL || 'https://public.blob.vercel-storage.com'
+const ENABLE_BLOB_CACHE = process.env.ENABLE_BLOB_CACHE === 'true' // Disabled by default, enable with ENABLE_BLOB_CACHE=true
 
 export async function searchYouTube(query: string, skipResultCache = false): Promise<YouTubeResult | null> {
-  console.log(`[YouTube Search] Starting search for: "${query}"`)
+  console.log(`[YouTube Search] Starting search for: "${query}" (Blob cache: ${ENABLE_BLOB_CACHE ? 'enabled' : 'disabled'})`)
 
   // Check result cache first (unless skipped)
   if (!skipResultCache) {
@@ -31,31 +32,35 @@ export async function searchYouTube(query: string, skipResultCache = false): Pro
     }
   }
 
-  // Check HTML cache in Blob storage
-  const blobKey = `yt_html_${query}`
-  const blobUrl = `${BLOB_STORE_URL}/${blobKey}`
+  // Check HTML cache in Blob storage if enabled
+  if (ENABLE_BLOB_CACHE) {
+    const blobKey = `yt_html_${query}`
+    const blobUrl = `${BLOB_STORE_URL}/${blobKey}`
 
-  try {
-    console.log(`[YouTube Search] Checking Blob storage for: "${query}"`)
-    const response = await fetch(blobUrl)
-    if (response.ok) {
-      console.log(`[YouTube Search] Found in Blob storage: "${query}"`)
-      const html = await response.text()
-      const result = parseYouTubeHtml(html)
-      if (result) {
-        console.log(`[YouTube Search] Successfully parsed HTML from Blob storage for: "${query}"`)
-        // Store the object directly, let Redis handle serialization
-        await setCachedYouTubeResult(query, result)
-        console.log(`[YouTube Search] Cached result in Redis for: "${query}"`)
-        return result
+    try {
+      console.log(`[YouTube Search] Checking Blob storage for: "${query}"`)
+      const response = await fetch(blobUrl)
+      if (response.ok) {
+        console.log(`[YouTube Search] Found in Blob storage: "${query}"`)
+        const html = await response.text()
+        const result = parseYouTubeHtml(html)
+        if (result) {
+          console.log(`[YouTube Search] Successfully parsed HTML from Blob storage for: "${query}"`)
+          // Store the object directly, let Redis handle serialization
+          await setCachedYouTubeResult(query, result)
+          console.log(`[YouTube Search] Cached result in Redis for: "${query}"`)
+          return result
+        } else {
+          console.log(`[YouTube Search] Failed to parse HTML from Blob storage for: "${query}"`)
+        }
       } else {
-        console.log(`[YouTube Search] Failed to parse HTML from Blob storage for: "${query}"`)
+        console.log(`[YouTube Search] Not found in Blob storage: "${query}"`)
       }
-    } else {
-      console.log(`[YouTube Search] Not found in Blob storage: "${query}"`)
+    } catch (error) {
+      console.error(`[YouTube Search] Error reading from Blob storage for: "${query}"`, error)
     }
-  } catch (error) {
-    console.error(`[YouTube Search] Error reading from Blob storage for: "${query}"`, error)
+  } else {
+    console.log(`[YouTube Search] Blob storage check skipped: caching disabled`)
   }
 
   // If no cache, fetch from YouTube
@@ -74,18 +79,23 @@ export async function searchYouTube(query: string, skipResultCache = false): Pro
     console.log(`[YouTube Search] Got response from YouTube for: "${query}"`)
     const html = await response.text()
 
-    // Cache the HTML in Blob storage
-    try {
-      console.log(`[YouTube Search] Caching HTML in Blob storage for: "${query}"`)
-      await put(blobKey, html, {
-        access: 'public',
-        addRandomSuffix: false,
-        contentType: 'text/html',
-        cacheControlMaxAge: 60 * 60 * 24 * 7 // Cache for 7 days
-      })
-      console.log(`[YouTube Search] Successfully cached HTML in Blob storage for: "${query}"`)
-    } catch (error) {
-      console.error(`[YouTube Search] Error saving to Blob storage for: "${query}"`, error)
+    // Cache the HTML in Blob storage if enabled
+    if (ENABLE_BLOB_CACHE) {
+      try {
+        const blobKey = `yt_html_${query}`
+        console.log(`[YouTube Search] Caching HTML in Blob storage for: "${query}"`)
+        await put(blobKey, html, {
+          access: 'public',
+          addRandomSuffix: false,
+          contentType: 'text/html',
+          cacheControlMaxAge: 60 * 60 * 24 * 7 // Cache for 7 days
+        })
+        console.log(`[YouTube Search] Successfully cached HTML in Blob storage for: "${query}"`)
+      } catch (error) {
+        console.error(`[YouTube Search] Error saving to Blob storage for: "${query}"`, error)
+      }
+    } else {
+      console.log(`[YouTube Search] Blob storage caching skipped: caching disabled`)
     }
 
     const result = parseYouTubeHtml(html)
