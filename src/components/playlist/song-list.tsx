@@ -17,7 +17,7 @@ export function SongList({ songs, onSongClick }: SongListProps) {
           <div
             key={song.id}
             onClick={() => onSongClick(song.youtubeLink)}
-            className="flex justify-between px-2 py-1 text-wonamp-text-green font-mono text-sm 
+            className="flex justify-between px-2 py-1 text-wonamp-text-green font-mono text-xs 
                      hover:bg-wonamp-hover cursor-pointer border-b border-wonamp-border last:border-0"
           >
             <div>
