@@ -7,6 +7,7 @@ export const useWonampActions = () => {
     setSongs,
     setUploadedImage,
     setTextInput,
+    setPlaylistId,
   } = useStore()
 
   const processText = async (text: string) => {
@@ -26,8 +27,16 @@ export const useWonampActions = () => {
         throw new Error('Failed to process text')
       }
 
-      const songs = await response.json()
-      setSongs(songs)
+      const data = await response.json()
+      if ('error' in data) {
+        throw new Error(data.error)
+      }
+
+      setSongs(data.songs)
+      setPlaylistId(data.playlistId)
+
+      // Update URL with playlist ID
+      window.history.replaceState(null, '', `#${data.playlistId}`)
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to process text')
     } finally {
@@ -53,11 +62,15 @@ export const useWonampActions = () => {
       })
 
       const data = await response.json()
-      if (data.error) {
+      if ('error' in data) {
         throw new Error(data.error)
       }
 
-      setSongs(data)
+      setSongs(data.songs)
+      setPlaylistId(data.playlistId)
+
+      // Update URL with playlist ID
+      window.history.replaceState(null, '', `#${data.playlistId}`)
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to process image')
       throw error // Re-throw to handle in the UI

@@ -40,6 +40,18 @@ const DialogTitle = React.forwardRef<
 ))
 DialogTitle.displayName = DialogPrimitive.Title.displayName
 
+const DialogDescription = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Description>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Description
+    ref={ref}
+    className={cn("text-wonamp-text-green/70 text-sm", className)}
+    {...props}
+  />
+))
+DialogDescription.displayName = DialogPrimitive.Description.displayName
+
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
@@ -58,9 +70,12 @@ const DialogContent = React.forwardRef<
       {...props}
     >
       {children}
+      <DialogPrimitive.Description className="sr-only">
+        Dialog content
+      </DialogPrimitive.Description>
     </DialogPrimitive.Content>
   </DialogPortal>
 ))
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
-export { Dialog, DialogTrigger, DialogContent, DialogTitle } 
+export { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription } 

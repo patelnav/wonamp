@@ -3,7 +3,7 @@
 import { useState, useRef } from "react"
 import { useStore } from "@/lib/store/useStore"
 import { useWonampActions } from "@/lib/store/useWonampActions"
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Loader2, Upload } from "lucide-react"
 
 export function InputModes() {
@@ -92,6 +92,9 @@ export function InputModes() {
       <Dialog open={showTextDialog} onOpenChange={(open) => !isProcessing && setShowTextDialog(open)}>
         <DialogContent onPointerDownOutside={(e) => e.preventDefault()}>
           <DialogTitle>Enter Songs (one per line)</DialogTitle>
+          <DialogDescription>
+            {`Enter each song in the format "Artist - Song Title" or just the song title`}
+          </DialogDescription>
           <textarea
             value={textInput}
             onChange={(e) => setTextInput(e.target.value)}
@@ -138,6 +141,9 @@ export function InputModes() {
       <Dialog open={showImageDialog} onOpenChange={(open) => !isProcessing && setShowImageDialog(open)}>
         <DialogContent onPointerDownOutside={(e) => e.preventDefault()}>
           <DialogTitle>Upload Image of Song List</DialogTitle>
+          <DialogDescription>
+            {`Upload an image containing a list of songs. We'll extract the song titles automatically.`}
+          </DialogDescription>
           <div
             className={`w-full h-64 border-2 border-dashed rounded-lg 
                      ${dragActive ? 'border-wonamp-text-green bg-black/10' : 'border-wonamp-border'} 

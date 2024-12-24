@@ -7,6 +7,8 @@ interface WonampState {
   currentMode: InputMode
   isProcessing: boolean
   error: string | null
+  playlistId: string | null
+  isLoadingPlaylist: boolean
 
   // Image mode state
   uploadedImage: File | null
@@ -24,9 +26,11 @@ interface WonampState {
   setUploadedImage: (file: File | null) => void
   setTextInput: (text: string) => void
   clearState: () => void
+  setPlaylistId: (id: string | null) => void
+  loadPlaylist: (id: string) => Promise<void>
 }
 
-export const useStore = create<WonampState>((set) => ({
+export const useStore = create<WonampState>((set, get) => ({
   // Initial state
   songs: [],
   currentMode: 'text',
@@ -34,6 +38,8 @@ export const useStore = create<WonampState>((set) => ({
   error: null,
   uploadedImage: null,
   textInput: '',
+  playlistId: null,
+  isLoadingPlaylist: false,
 
   // Actions
   setSongs: (songs) => set({ songs }),
@@ -63,6 +69,52 @@ export const useStore = create<WonampState>((set) => ({
     isProcessing: false,
     error: null,
     uploadedImage: null,
-    textInput: ''
-  })
+    textInput: '',
+    playlistId: null
+  }),
+  setPlaylistId: (id) => set({ playlistId: id }),
+  loadPlaylist: async (id) => {
+    const state = get()
+    if (state.isLoadingPlaylist) return
+
+    set({ isLoadingPlaylist: true, error: null })
+    try {
+      const response = await fetch(`/api/playlists?id=${id}`)
+      if (!response.ok) {
+        throw new Error(response.statusText)
+      }
+      const data = await response.json()
+
+      // Validate that we received an array of songs
+      if (!Array.isArray(data)) {
+        throw new Error('Invalid playlist data')
+      }
+
+      // Validate each song has the required properties
+      const songs = data.filter((song): song is Song => {
+        return (
+          typeof song === 'object' &&
+          song !== null &&
+          typeof song.id === 'string' &&
+          typeof song.artist === 'string' &&
+          typeof song.songTitle === 'string' &&
+          (song.youtubeLink === null || typeof song.youtubeLink === 'string')
+        )
+      })
+
+      set({
+        songs,
+        playlistId: id,
+        isLoadingPlaylist: false,
+        error: songs.length === 0 ? 'Playlist is empty' : null
+      })
+    } catch (error) {
+      console.error('Failed to load playlist:', error)
+      set({
+        songs: [],
+        error: error instanceof Error ? error.message : 'Failed to load playlist',
+        isLoadingPlaylist: false
+      })
+    }
+  }
 })) 

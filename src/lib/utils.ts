@@ -1,6 +1,7 @@
 import { createHash } from 'crypto'
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { Song } from '@/types/song'
 
 /**
  * Generates a unique, URL-friendly ID for a song based on artist and title
@@ -45,4 +46,28 @@ export function isValidSongText(text: string): boolean {
  */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
+}
+
+/**
+ * Generates a deterministic playlist ID based on the content of the songs
+ * Same songs will always generate the same ID
+ */
+export function generatePlaylistID(songs: Song[]): string {
+  // Sort songs to ensure same content generates same hash regardless of order
+  const sortedSongs = [...songs].sort((a, b) =>
+    `${a.artist}-${a.songTitle}`.localeCompare(`${b.artist}-${b.songTitle}`)
+  )
+
+  // Create a string representation of the playlist
+  const playlistString = sortedSongs
+    .map(song => `${song.artist}-${song.songTitle}`)
+    .join('|')
+
+  // Generate a hash of the playlist content
+  const hash = createHash('sha256')
+    .update(playlistString)
+    .digest('base64url')
+    .substring(0, 12) // Use first 12 chars for a reasonable length
+
+  return hash
 }

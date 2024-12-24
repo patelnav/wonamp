@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 import { searchYouTube } from '@/lib/youtube'
-import { generateSongID } from '@/lib/utils'
+import { generateSongID, generatePlaylistID } from '@/lib/utils'
 import { Song } from '@/types/song'
 import { z } from 'zod'
+import { kv } from '@vercel/kv'
 
 const MAX_SONG_LENGTH = 300
 const MAX_SONG_COUNT = 30
@@ -23,7 +24,7 @@ const songLineSchema = z.string()
     message: "Invalid song format"
   })
 
-export async function POST(request: Request): Promise<NextResponse<{ error: string } | Song[]>> {
+export async function POST(request: Request): Promise<NextResponse<{ error: string } | { songs: Song[], playlistId: string }>> {
   console.log('[Search Text] Starting new search request')
   try {
     // Parse and validate request body
@@ -88,7 +89,14 @@ export async function POST(request: Request): Promise<NextResponse<{ error: stri
     const validResults = results.filter((result): result is Song => result !== null)
     console.log(`[Search Text] Search completed. ${validResults.length}/${results.length} songs processed successfully`)
 
-    return NextResponse.json(validResults)
+    // Generate and store playlist
+    const playlistId = generatePlaylistID(validResults)
+    await kv.set(`playlist:${playlistId}`, validResults)
+
+    return NextResponse.json({
+      songs: validResults,
+      playlistId
+    })
   } catch (error) {
     console.error('[Search Text] Error processing request:', error)
     return NextResponse.json(

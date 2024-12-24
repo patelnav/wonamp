@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server'
 import { GenerationConfig, GoogleGenerativeAI, SchemaType } from '@google/generative-ai'
 import { searchYouTube } from '@/lib/youtube'
-import { generateSongID } from '@/lib/utils'
+import { generateSongID, generatePlaylistID } from '@/lib/utils'
 import { Song } from '@/types/song'
 import { z } from 'zod'
+import { kv } from '@vercel/kv'
 
 const MAX_SONG_COUNT = 30
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
@@ -75,7 +76,7 @@ async function extractSongsFromImage(imageData: Blob): Promise<string[]> {
   }
 }
 
-export async function POST(request: Request): Promise<NextResponse<{ error: string } | Song[]>> {
+export async function POST(request: Request): Promise<NextResponse<{ error: string } | { songs: Song[], playlistId: string }>> {
   console.log('[Process Image] Starting new image processing request')
   try {
     // Get the form data
@@ -128,7 +129,14 @@ export async function POST(request: Request): Promise<NextResponse<{ error: stri
     const validResults = results.filter((result): result is Song => result !== null)
     console.log(`[Process Image] Processing completed. ${validResults.length}/${results.length} songs processed successfully`)
 
-    return NextResponse.json(validResults)
+    // Generate and store playlist
+    const playlistId = generatePlaylistID(validResults)
+    await kv.set(`playlist:${playlistId}`, validResults)
+
+    return NextResponse.json({
+      songs: validResults,
+      playlistId
+    })
   } catch (error) {
     console.error('[Process Image] Error processing request:', error)
     return NextResponse.json(
