@@ -27,10 +27,13 @@ interface WonampState {
 
   // Player state
   currentVideoId: string | null
+  currentSongIndex: number | null
+  setCurrentSong: (index: number) => void
+  playNextSong: () => void
   setCurrentVideoId: (id: string | null) => void
 }
 
-export const useStore = create<WonampState>((set) => ({
+export const useStore = create<WonampState>((set, get) => ({
   // Processing state
   isProcessing: false,
   setProcessing: (isProcessing) => set({ isProcessing }),
@@ -70,5 +73,24 @@ export const useStore = create<WonampState>((set) => ({
 
   // Player state
   currentVideoId: null,
+  currentSongIndex: null,
+  setCurrentSong: (index) => {
+    const state = get()
+    if (index >= 0 && index < state.songs.length) {
+      const song = state.songs[index]
+      const videoId = song.youtubeLink?.split('=')[1] || null
+      set({
+        currentSongIndex: index,
+        currentVideoId: videoId
+      })
+    }
+  },
+  playNextSong: () => {
+    const state = get()
+    if (state.currentSongIndex !== null && state.songs.length > 0) {
+      const nextIndex = (state.currentSongIndex + 1) % state.songs.length
+      state.setCurrentSong(nextIndex)
+    }
+  },
   setCurrentVideoId: (id) => set({ currentVideoId: id }),
 })) 

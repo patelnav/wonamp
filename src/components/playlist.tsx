@@ -21,17 +21,17 @@ function PlaylistHeader() {
 // Song List Component
 interface SongListProps {
   songs: Song[]
-  onSongClick: (youtubeLink: string | null) => void
+  onSongClick: (index: number) => void
 }
 
 function SongList({ songs, onSongClick }: SongListProps) {
-  const handleClick = (e: React.MouseEvent, youtubeLink: string | null) => {
+  const handleClick = (e: React.MouseEvent, index: number) => {
     // If user is holding cmd/ctrl or middle clicking, let the browser handle it
     if (e.metaKey || e.ctrlKey || e.button === 1) return
 
     // Otherwise prevent default link behavior and use our player
     e.preventDefault()
-    onSongClick(youtubeLink)
+    onSongClick(index)
   }
 
   return (
@@ -51,7 +51,7 @@ function SongList({ songs, onSongClick }: SongListProps) {
                 <td className="px-2 py-1 text-wonamp-text-green font-mono text-xs whitespace-nowrap">
                   <a
                     href={song.youtubeLink || '#'}
-                    onClick={(e) => handleClick(e, song.youtubeLink)}
+                    onClick={(e) => handleClick(e, index)}
                     className="block w-full"
                   >
                     <div className="flex justify-between items-center">
@@ -128,13 +128,10 @@ function PlaylistControls({ songCount, onQuickPlaylist, hasSongs }: PlaylistCont
 // Main Playlist Component
 export function Playlist() {
   const { songs } = useStore()
-  const setCurrentVideoId = useStore((state) => state.setCurrentVideoId)
+  const setCurrentSong = useStore((state) => state.setCurrentSong)
 
-  const handleSongClick = (youtubeLink: string | null) => {
-    if (youtubeLink) {
-      const videoId = youtubeLink.split('=')[1]
-      setCurrentVideoId(videoId)
-    }
+  const handleSongClick = (index: number) => {
+    setCurrentSong(index)
   }
 
   const handleQuickPlaylist = () => {
