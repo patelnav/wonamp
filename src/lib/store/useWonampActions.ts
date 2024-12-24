@@ -36,6 +36,10 @@ export const useWonampActions = () => {
   }
 
   const processImage = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      throw new Error('Please upload an image file')
+    }
+
     try {
       setProcessing(true)
       setUploadedImage(file)
@@ -45,17 +49,18 @@ export const useWonampActions = () => {
 
       const response = await fetch('/api/process-image', {
         method: 'POST',
-        body: formData,
+        body: formData
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to process image')
+      const data = await response.json()
+      if (data.error) {
+        throw new Error(data.error)
       }
 
-      const songs = await response.json()
-      setSongs(songs)
+      setSongs(data)
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to process image')
+      throw error // Re-throw to handle in the UI
     } finally {
       setProcessing(false)
     }
