@@ -22,7 +22,7 @@ export function InputModes() {
   }
 
   return (
-    <div className="flex items-center justify-center pointer-events-none">
+    <div className="flex items-center justify-center pointer-events-none p-2">
       <div className="pointer-events-auto">
         <InputModeButtons
           onTextClick={() => setShowTextDialog(true)}

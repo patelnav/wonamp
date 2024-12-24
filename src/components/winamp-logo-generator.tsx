@@ -95,6 +95,7 @@ export const WinampLogoGenerator: React.FC = () => {
     if (canvasRef512.current) {
       drawIcon(canvasRef512.current, 512)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
