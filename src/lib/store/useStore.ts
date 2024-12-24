@@ -1,120 +1,74 @@
 import { create } from 'zustand'
-import { Song, InputMode } from '@/types/song'
+import { Song } from '@/types/song'
 
 interface WonampState {
-  // Current playlist state
-  songs: Song[]
-  currentMode: InputMode
+  // Processing state
   isProcessing: boolean
-  error: string | null
-  playlistId: string | null
-  isLoadingPlaylist: boolean
-
-  // Image mode state
-  uploadedImage: File | null
-
-  // Text mode state
-  textInput: string
-
-  // Actions
-  setSongs: (songs: Song[]) => void
-  addSong: (song: Song) => void
-  removeSong: (id: string) => void
-  setMode: (mode: InputMode) => void
   setProcessing: (isProcessing: boolean) => void
+
+  // Error state
+  error: string | null
   setError: (error: string | null) => void
-  setUploadedImage: (file: File | null) => void
+
+  // Songs state
+  songs: Song[]
+  setSongs: (songs: Song[]) => void
+
+  // Input state
+  uploadedImage: File | null
+  setUploadedImage: (image: File | null) => void
+  textInput: string
   setTextInput: (text: string) => void
-  clearState: () => void
+
+  // Playlist state
+  playlistId: string | null
   setPlaylistId: (id: string | null) => void
   loadPlaylist: (id: string) => Promise<void>
+
+  // Player state
+  currentVideoId: string | null
+  setCurrentVideoId: (id: string | null) => void
 }
 
-export const useStore = create<WonampState>((set, get) => ({
-  // Initial state
-  songs: [],
-  currentMode: 'text',
+export const useStore = create<WonampState>((set) => ({
+  // Processing state
   isProcessing: false,
-  error: null,
-  uploadedImage: null,
-  textInput: '',
-  playlistId: null,
-  isLoadingPlaylist: false,
-
-  // Actions
-  setSongs: (songs) => set({ songs }),
-  addSong: (song) => set((state) => ({
-    songs: [...state.songs, song],
-    error: null
-  })),
-  removeSong: (id) => set((state) => ({
-    songs: state.songs.filter((song) => song.id !== id)
-  })),
-  setMode: (mode) => set({
-    currentMode: mode,
-    error: null
-  }),
   setProcessing: (isProcessing) => set({ isProcessing }),
+
+  // Error state
+  error: null,
   setError: (error) => set({ error }),
-  setUploadedImage: (file) => set({
-    uploadedImage: file,
-    error: null
-  }),
-  setTextInput: (text) => set({
-    textInput: text,
-    error: null
-  }),
-  clearState: () => set({
-    songs: [],
-    isProcessing: false,
-    error: null,
-    uploadedImage: null,
-    textInput: '',
-    playlistId: null
-  }),
+
+  // Songs state
+  songs: [],
+  setSongs: (songs) => set({ songs }),
+
+  // Input state
+  uploadedImage: null,
+  setUploadedImage: (image) => set({ uploadedImage: image }),
+  textInput: '',
+  setTextInput: (text) => set({ textInput: text }),
+
+  // Playlist state
+  playlistId: null,
   setPlaylistId: (id) => set({ playlistId: id }),
   loadPlaylist: async (id) => {
-    const state = get()
-    if (state.isLoadingPlaylist) return
-
-    set({ isLoadingPlaylist: true, error: null })
     try {
+      set({ isProcessing: true })
       const response = await fetch(`/api/playlists?id=${id}`)
       if (!response.ok) {
-        throw new Error(response.statusText)
+        throw new Error('Failed to load playlist')
       }
-      const data = await response.json()
-
-      // Validate that we received an array of songs
-      if (!Array.isArray(data)) {
-        throw new Error('Invalid playlist data')
-      }
-
-      // Validate each song has the required properties
-      const songs = data.filter((song): song is Song => {
-        return (
-          typeof song === 'object' &&
-          song !== null &&
-          typeof song.id === 'string' &&
-          typeof song.artist === 'string' &&
-          typeof song.songTitle === 'string' &&
-          (song.youtubeLink === null || typeof song.youtubeLink === 'string')
-        )
-      })
-
-      set({
-        songs,
-        playlistId: id,
-        isLoadingPlaylist: false,
-        error: songs.length === 0 ? 'Playlist is empty' : null
-      })
+      const songs = await response.json()
+      set({ songs, playlistId: id })
     } catch (error) {
-      console.error('Failed to load playlist:', error)
-      set({
-        songs: [],
-        error: error instanceof Error ? error.message : 'Failed to load playlist',
-        isLoadingPlaylist: false
-      })
+      set({ error: error instanceof Error ? error.message : 'Failed to load playlist' })
+    } finally {
+      set({ isProcessing: false })
     }
-  }
+  },
+
+  // Player state
+  currentVideoId: null,
+  setCurrentVideoId: (id) => set({ currentVideoId: id }),
 })) 

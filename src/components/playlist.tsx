@@ -25,6 +25,15 @@ interface SongListProps {
 }
 
 function SongList({ songs, onSongClick }: SongListProps) {
+  const handleClick = (e: React.MouseEvent, youtubeLink: string | null) => {
+    // If user is holding cmd/ctrl or middle clicking, let the browser handle it
+    if (e.metaKey || e.ctrlKey || e.button === 1) return
+
+    // Otherwise prevent default link behavior and use our player
+    e.preventDefault()
+    onSongClick(youtubeLink)
+  }
+
   return (
     <div className="absolute inset-0 overflow-y-auto">
       <table className="w-full border-collapse bg-black">
@@ -37,25 +46,30 @@ function SongList({ songs, onSongClick }: SongListProps) {
             songs.map((song, index) => (
               <tr
                 key={song.id}
-                onClick={() => onSongClick(song.youtubeLink)}
                 className="hover:bg-wonamp-hover cursor-pointer border-b border-wonamp-border last:border-0"
               >
                 <td className="px-2 py-1 text-wonamp-text-green font-mono text-xs whitespace-nowrap">
-                  <div className="flex justify-between items-center">
-                    <div className="overflow-hidden">
-                      {song.youtubeTitle ? (
-                        <div className="truncate">
-                          <span className="opacity-70">{index + 1}.</span> {song.youtubeTitle}
-                          <span className="opacity-50 ml-2">({song.artist} - {song.songTitle})</span>
-                        </div>
-                      ) : (
-                        <div className="truncate">
-                          <span className="opacity-70">{index + 1}.</span> {song.artist} - {song.songTitle}
-                        </div>
-                      )}
+                  <a
+                    href={song.youtubeLink || '#'}
+                    onClick={(e) => handleClick(e, song.youtubeLink)}
+                    className="block w-full"
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="overflow-hidden">
+                        {song.youtubeTitle ? (
+                          <div className="truncate">
+                            <span className="opacity-70">{index + 1}.</span> {song.youtubeTitle}
+                            <span className="opacity-50 ml-2">({song.artist} - {song.songTitle})</span>
+                          </div>
+                        ) : (
+                          <div className="truncate">
+                            <span className="opacity-70">{index + 1}.</span> {song.artist} - {song.songTitle}
+                          </div>
+                        )}
+                      </div>
+                      <div className="opacity-70 flex-shrink-0 ml-4">{song.duration || "0:00"}</div>
                     </div>
-                    <div className="opacity-70 flex-shrink-0 ml-4">{song.duration || "0:00"}</div>
-                  </div>
+                  </a>
                 </td>
               </tr>
             ))
@@ -114,10 +128,12 @@ function PlaylistControls({ songCount, onQuickPlaylist, hasSongs }: PlaylistCont
 // Main Playlist Component
 export function Playlist() {
   const { songs } = useStore()
+  const setCurrentVideoId = useStore((state) => state.setCurrentVideoId)
 
   const handleSongClick = (youtubeLink: string | null) => {
     if (youtubeLink) {
-      window.open(youtubeLink, '_blank')
+      const videoId = youtubeLink.split('=')[1]
+      setCurrentVideoId(videoId)
     }
   }
 
