@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react"
 import { useStore } from "@/lib/store/useStore"
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { Loader2, Upload } from "lucide-react"
+import { Loader2, Upload, X } from "lucide-react"
 
 interface ImageUploadDialogProps {
   open: boolean
@@ -32,9 +32,18 @@ async function checkExistingPlaylist(hash: string) {
 
 export function ImageUploadDialog({ open, onOpenChange, onSubmit }: ImageUploadDialogProps) {
   const [dragActive, setDragActive] = useState(false)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const dropZoneRef = useRef<HTMLDivElement>(null)
   const isProcessing = useStore((state) => state.isProcessing)
+
+  // Clean up preview URL when dialog closes
+  useEffect(() => {
+    if (!open && previewUrl) {
+      URL.revokeObjectURL(previewUrl)
+      setPreviewUrl(null)
+    }
+  }, [open, previewUrl])
 
   const processFile = async (file: File) => {
     try {
@@ -46,6 +55,12 @@ export function ImageUploadDialog({ open, onOpenChange, onSubmit }: ImageUploadD
       if (!file.type.startsWith('image/')) {
         throw new Error('File must be an image')
       }
+
+      // Create preview
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl)
+      }
+      setPreviewUrl(URL.createObjectURL(file))
 
       // Generate hash and check for existing playlist
       const hash = await generateHash(file)
@@ -119,6 +134,16 @@ export function ImageUploadDialog({ open, onOpenChange, onSubmit }: ImageUploadD
     }
   }
 
+  const clearPreview = () => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl)
+      setPreviewUrl(null)
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={(open) => !isProcessing && onOpenChange(open)}>
       <DialogContent onPointerDownOutside={(e) => e.preventDefault()}>
@@ -132,7 +157,7 @@ export function ImageUploadDialog({ open, onOpenChange, onSubmit }: ImageUploadD
                    ${dragActive ? 'border-wonamp-text-green bg-black/10' : 'border-wonamp-border'} 
                    flex flex-col items-center justify-center gap-4 relative
                    ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-          onClick={() => !isProcessing && fileInputRef.current?.click()}
+          onClick={() => !isProcessing && !previewUrl && fileInputRef.current?.click()}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
@@ -146,19 +171,41 @@ export function ImageUploadDialog({ open, onOpenChange, onSubmit }: ImageUploadD
             onChange={handleFileChange}
             disabled={isProcessing}
           />
-          <Upload className="w-12 h-12 text-wonamp-text-green" />
-          <div className="text-center">
-            <p className="text-wonamp-text-green font-bold">
-              {isProcessing ? (
-                "Processing..."
-              ) : (
-                "Drop your image here, click to select, or paste from clipboard"
-              )}
-            </p>
-            <p className="text-wonamp-text-green/60 text-sm mt-2">
-              Supports JPG, PNG, GIF up to 10MB
-            </p>
-          </div>
+          {previewUrl ? (
+            <div className="relative w-full h-full p-4">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  clearPreview()
+                }}
+                className="absolute top-2 right-2 z-10 p-1 bg-black/50 rounded-full 
+                         hover:bg-black/70 transition-colors"
+              >
+                <X className="w-4 h-4 text-white" />
+              </button>
+              <img
+                src={previewUrl}
+                alt="Preview"
+                className="w-full h-full object-contain"
+              />
+            </div>
+          ) : (
+            <>
+              <Upload className="w-12 h-12 text-wonamp-text-green" />
+              <div className="text-center">
+                <p className="text-wonamp-text-green font-bold">
+                  {isProcessing ? (
+                    "Processing..."
+                  ) : (
+                    "Drop your image here, click to select, or paste from clipboard"
+                  )}
+                </p>
+                <p className="text-wonamp-text-green/60 text-sm mt-2">
+                  Supports JPG, PNG, GIF up to 10MB
+                </p>
+              </div>
+            </>
+          )}
           {isProcessing && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/50">
               <Loader2 className="w-8 h-8 animate-spin text-wonamp-text-green" />
