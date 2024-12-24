@@ -36,7 +36,7 @@ function SongList({ songs, onSongClick }: SongListProps) {
 
   return (
     <div className="absolute inset-0 overflow-y-auto">
-      <table className="w-full border-collapse bg-black">
+      <table className="w-full border-collapse bg-black table-fixed">
         <tbody>
           {songs.length === 0 ? (
             <tr>
@@ -48,26 +48,26 @@ function SongList({ songs, onSongClick }: SongListProps) {
                 key={song.id}
                 className="hover:bg-wonamp-hover cursor-pointer border-b border-wonamp-border last:border-0"
               >
-                <td className="px-2 py-1 text-wonamp-text-green font-mono text-xs whitespace-nowrap">
+                <td className="px-2 py-1 text-wonamp-text-green font-mono text-xs">
                   <a
                     href={song.youtubeLink || '#'}
                     onClick={(e) => handleClick(e, index)}
                     className="block w-full"
                   >
-                    <div className="flex justify-between items-center">
-                      <div className="overflow-hidden">
+                    <div className="flex items-center">
+                      <div className="min-w-0 flex-1 truncate">
                         {song.youtubeTitle ? (
-                          <div className="truncate">
+                          <>
                             <span className="opacity-70">{index + 1}.</span> {song.youtubeTitle}
                             <span className="opacity-50 ml-2">({song.artist} - {song.songTitle})</span>
-                          </div>
+                          </>
                         ) : (
-                          <div className="truncate">
+                          <>
                             <span className="opacity-70">{index + 1}.</span> {song.artist} - {song.songTitle}
-                          </div>
+                          </>
                         )}
                       </div>
-                      <div className="opacity-70 flex-shrink-0 ml-4">{song.duration || "0:00"}</div>
+                      <div className="opacity-70 flex-shrink-0 ml-4 text-right">{song.duration || "0:00"}</div>
                     </div>
                   </a>
                 </td>

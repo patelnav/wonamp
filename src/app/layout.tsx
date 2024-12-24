@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { PlaylistLoader } from "@/components/playlist-loader";
@@ -16,22 +16,23 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: {
+    media: "(prefers-color-scheme: dark)",
+    color: "#000000"
+  }
+}
+
 export const metadata: Metadata = {
   title: "Wonamp - Make Your Playlist Dreams Come True",
   description: "Transform your music experience with Wonamp - where your playlist dreams come true. A modern web-based audio player inspired by the classic Winamp.",
   keywords: ["audio player", "music player", "web audio", "winamp", "wonamp", "playlist", "music streaming"],
   authors: [{ name: "Wonamp" }],
   manifest: "/manifest.json",
-  themeColor: {
-    media: "(prefers-color-scheme: dark)",
-    color: "#000000"
-  },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false
-  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
