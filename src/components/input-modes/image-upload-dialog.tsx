@@ -11,11 +11,60 @@ interface ImageUploadDialogProps {
   onSubmit: (file: File) => Promise<void>
 }
 
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
+
+async function generateHash(file: File): Promise<string> {
+  const buffer = await file.arrayBuffer()
+  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+  return hashHex.slice(0, 12)
+}
+
+async function checkExistingPlaylist(hash: string) {
+  const response = await fetch('/api/playlist-from-hash', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ hash })
+  })
+  return response.json()
+}
+
 export function ImageUploadDialog({ open, onOpenChange, onSubmit }: ImageUploadDialogProps) {
   const [dragActive, setDragActive] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const dropZoneRef = useRef<HTMLDivElement>(null)
   const isProcessing = useStore((state) => state.isProcessing)
+
+  const processFile = async (file: File) => {
+    try {
+      // Client-side validation
+      if (file.size > MAX_IMAGE_SIZE) {
+        throw new Error(`Image must be less than ${MAX_IMAGE_SIZE / (1024 * 1024)}MB`)
+      }
+
+      if (!file.type.startsWith('image/')) {
+        throw new Error('File must be an image')
+      }
+
+      // Generate hash and check for existing playlist
+      const hash = await generateHash(file)
+      const result = await checkExistingPlaylist(hash)
+
+      if (result.exists) {
+        // Use existing playlist
+        useStore.setState({ songs: result.songs, playlistId: result.playlistId })
+        onOpenChange(false)
+        return
+      }
+
+      // No existing playlist, proceed with full upload
+      await onSubmit(file)
+    } catch (error) {
+      console.error('Error processing file:', error)
+      alert(error instanceof Error ? error.message : 'Failed to process file')
+    }
+  }
 
   // Handle clipboard paste
   useEffect(() => {
@@ -35,12 +84,11 @@ export function ImageUploadDialog({ open, onOpenChange, onSubmit }: ImageUploadD
       if (imageItem) {
         const file = imageItem.getAsFile()
         if (file) {
-          await onSubmit(file)
+          await processFile(file)
         }
       }
     }
 
-    // Add paste event listener when dialog is open
     document.addEventListener('paste', handlePaste)
     return () => document.removeEventListener('paste', handlePaste)
   }, [open, onSubmit])
@@ -61,13 +109,13 @@ export function ImageUploadDialog({ open, onOpenChange, onSubmit }: ImageUploadD
     setDragActive(false)
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      await onSubmit(e.dataTransfer.files[0])
+      await processFile(e.dataTransfer.files[0])
     }
   }
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      await onSubmit(e.target.files[0])
+      await processFile(e.target.files[0])
     }
   }
 
