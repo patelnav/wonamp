@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useStore } from "@/lib/store/useStore"
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Loader2, Upload } from "lucide-react"
@@ -14,7 +14,36 @@ interface ImageUploadDialogProps {
 export function ImageUploadDialog({ open, onOpenChange, onSubmit }: ImageUploadDialogProps) {
   const [dragActive, setDragActive] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const dropZoneRef = useRef<HTMLDivElement>(null)
   const isProcessing = useStore((state) => state.isProcessing)
+
+  // Handle clipboard paste
+  useEffect(() => {
+    if (!open) return
+
+    const handlePaste = async (e: ClipboardEvent) => {
+      e.preventDefault()
+      const items = e.clipboardData?.items
+
+      if (!items) return
+
+      // Find the first image item in the clipboard
+      const imageItem = Array.from(items).find(
+        item => item.type.indexOf('image') !== -1
+      )
+
+      if (imageItem) {
+        const file = imageItem.getAsFile()
+        if (file) {
+          await onSubmit(file)
+        }
+      }
+    }
+
+    // Add paste event listener when dialog is open
+    document.addEventListener('paste', handlePaste)
+    return () => document.removeEventListener('paste', handlePaste)
+  }, [open, onSubmit])
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault()
@@ -50,6 +79,7 @@ export function ImageUploadDialog({ open, onOpenChange, onSubmit }: ImageUploadD
           {`Upload an image containing a list of songs. We'll extract the song titles automatically.`}
         </DialogDescription>
         <div
+          ref={dropZoneRef}
           className={`w-full h-64 border-2 border-dashed rounded-lg 
                    ${dragActive ? 'border-wonamp-text-green bg-black/10' : 'border-wonamp-border'} 
                    flex flex-col items-center justify-center gap-4 relative
@@ -74,7 +104,7 @@ export function ImageUploadDialog({ open, onOpenChange, onSubmit }: ImageUploadD
               {isProcessing ? (
                 "Processing..."
               ) : (
-                "Drop your image here, or click to select"
+                "Drop your image here, click to select, or paste from clipboard"
               )}
             </p>
             <p className="text-wonamp-text-green/60 text-sm mt-2">

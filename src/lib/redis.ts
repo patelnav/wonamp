@@ -3,7 +3,7 @@ import { Song } from '@/types/song'
 import { songArraySchema } from '@/lib/validations/song'
 
 // Cache duration in seconds (24 hours)
-const CACHE_DURATION = 24 * 60 * 60
+const CACHE_DURATION = 24 * 60 * 60 * 7 // 7 days
 
 // Key prefixes
 const YOUTUBE_PREFIX = 'yt:'
