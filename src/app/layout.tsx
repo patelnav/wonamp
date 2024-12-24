@@ -4,12 +4,7 @@ import "./globals.css";
 import { PlaylistLoader } from "@/components/playlist-loader";
 import { ServiceWorkerProvider } from "@/lib/pwa/service-worker-provider";
 import Script from "next/script";
-import LogRocket from 'logrocket';
-
-// Initialize LogRocket in production
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
-  LogRocket.init('98k6pd/wonamp');
-}
+import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -72,20 +67,13 @@ export default function RootLayout({
           src="https://www.googletagmanager.com/gtag/js?id=G-013B1YZQXZ"
           strategy="afterInteractive"
         />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-013B1YZQXZ');
-          `}
-        </Script>
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black`}
       >
         <ServiceWorkerProvider>
           <PlaylistLoader />
+          <AnalyticsProvider />
           {children}
         </ServiceWorkerProvider>
       </body>
