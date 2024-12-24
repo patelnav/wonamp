@@ -5,7 +5,8 @@ import { generateSongID, generatePlaylistID } from '@/lib/utils'
 import { Song } from '@/types/song'
 import { z } from 'zod'
 import { songArraySchema } from '@/lib/validations/song'
-import { storePlaylist } from '@/lib/redis'
+import { storePlaylist, getPlaylist, getPlaylistFromImageHash, storeImageHashToPlaylist } from '@/lib/redis'
+import { createHash } from 'crypto'
 
 const MAX_SONG_COUNT = 30
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
@@ -42,6 +43,11 @@ const generationConfig: GenerationConfig = {
       }
     }
   },
+}
+
+async function generateImageHash(imageData: Blob): Promise<string> {
+  const buffer = Buffer.from(await imageData.arrayBuffer())
+  return createHash('sha256').update(buffer).digest('hex').slice(0, 12)
 }
 
 async function extractSongsFromImage(imageData: Blob): Promise<string[]> {
@@ -92,6 +98,24 @@ export async function POST(request: Request): Promise<NextResponse<{ error: stri
     requestSchema.parse({ image: imageFile })
     console.log(`[Process Image] Received image of size: ${imageFile.size} bytes`)
 
+    // Generate hash for the image
+    const imageHash = await generateImageHash(imageFile)
+    console.log(`[Process Image] Generated hash: ${imageHash}`)
+
+    // Check if we've processed this image before
+    const existingPlaylistId = await getPlaylistFromImageHash(imageHash)
+    if (existingPlaylistId) {
+      console.log(`[Process Image] Found existing playlist for hash: ${imageHash}`)
+      const playlist = await getPlaylist(existingPlaylistId)
+      if (playlist) {
+        console.log(`[Process Image] Returning cached playlist: ${existingPlaylistId}`)
+        return NextResponse.json({
+          songs: playlist,
+          playlistId: existingPlaylistId
+        })
+      }
+    }
+
     // Extract songs from image using Gemini
     const songLines = await extractSongsFromImage(imageFile)
     console.log(`[Process Image] Extracted ${songLines.length} songs from image`)
@@ -141,6 +165,10 @@ export async function POST(request: Request): Promise<NextResponse<{ error: stri
     // Generate and store playlist
     const playlistId = generatePlaylistID(validResults)
     await storePlaylist(playlistId, validResults)
+
+    // Store image hash -> playlist mapping
+    await storeImageHashToPlaylist(imageHash, playlistId)
+    console.log(`[Process Image] Stored hash mapping: ${imageHash} -> ${playlistId}`)
 
     return NextResponse.json({
       songs: validResults,

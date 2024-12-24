@@ -8,6 +8,7 @@ const CACHE_DURATION = 24 * 60 * 60
 // Key prefixes
 const YOUTUBE_PREFIX = 'yt:'
 const PLAYLIST_PREFIX = 'playlist:'
+const IMAGE_HASH_PREFIX = 'img:'
 
 // YouTube cache operations
 export async function getCachedYouTubeResult(query: string): Promise<string | null> {
@@ -16,6 +17,16 @@ export async function getCachedYouTubeResult(query: string): Promise<string | nu
 
 export async function setCachedYouTubeResult(query: string, result: string): Promise<void> {
   await kv.set(`${YOUTUBE_PREFIX}${query}`, result, { ex: CACHE_DURATION })
+}
+
+// Image hash operations
+export async function getPlaylistFromImageHash(hash: string): Promise<string | null> {
+  return kv.get<string>(`${IMAGE_HASH_PREFIX}${hash}`)
+}
+
+export async function storeImageHashToPlaylist(hash: string, playlistId: string): Promise<void> {
+  // Store permanently (no expiration) since playlists are permanent
+  await kv.set(`${IMAGE_HASH_PREFIX}${hash}`, playlistId)
 }
 
 // Playlist operations
