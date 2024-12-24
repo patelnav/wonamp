@@ -4,7 +4,8 @@ import { searchYouTube } from '@/lib/youtube'
 import { generateSongID, generatePlaylistID } from '@/lib/utils'
 import { Song } from '@/types/song'
 import { z } from 'zod'
-import { kv } from '@vercel/kv'
+import { songArraySchema } from '@/lib/validations/song'
+import { storePlaylist } from '@/lib/redis'
 
 const MAX_SONG_COUNT = 30
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
@@ -125,13 +126,21 @@ export async function POST(request: Request): Promise<NextResponse<{ error: stri
       })
     )
 
-    // Filter out failed results
+    // Filter out failed results and validate
     const validResults = results.filter((result): result is Song => result !== null)
     console.log(`[Process Image] Processing completed. ${validResults.length}/${results.length} songs processed successfully`)
 
+    // Validate the songs array
+    try {
+      songArraySchema.parse(validResults)
+    } catch (error) {
+      console.error('[Process Image] Invalid song data:', error)
+      throw new Error('Failed to validate song data')
+    }
+
     // Generate and store playlist
     const playlistId = generatePlaylistID(validResults)
-    await kv.set(`playlist:${playlistId}`, validResults)
+    await storePlaylist(playlistId, validResults)
 
     return NextResponse.json({
       songs: validResults,

@@ -1,19 +1,12 @@
 import { NextResponse } from 'next/server'
-import { kv } from '@vercel/kv'
-import { Song } from '@/types/song'
 import { generatePlaylistID } from '@/lib/utils'
 import { z } from 'zod'
+import { songArraySchema } from '@/lib/validations/song'
+import { getPlaylist, storePlaylist, checkPlaylistExists } from '@/lib/redis'
 
 // Validation schema for POST request
 const postRequestSchema = z.object({
-  songs: z.array(z.object({
-    id: z.string(),
-    artist: z.string(),
-    songTitle: z.string(),
-    youtubeLink: z.string().nullable(),
-    youtubeTitle: z.string().optional(),
-    duration: z.string().optional()
-  }))
+  songs: songArraySchema
 })
 
 // GET /api/playlists?id=<playlist-id>
@@ -26,7 +19,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Missing playlist ID' }, { status: 400 })
     }
 
-    const playlist = await kv.get<Song[]>(`playlist:${id}`)
+    const playlist = await getPlaylist(id)
 
     if (!playlist) {
       return NextResponse.json({ error: 'Playlist not found' }, { status: 404 })
@@ -52,14 +45,14 @@ export async function POST(request: Request) {
     const playlistId = generatePlaylistID(songs)
 
     // Check if playlist already exists
-    const existing = await kv.get(`playlist:${playlistId}`)
-    if (existing) {
+    const exists = await checkPlaylistExists(playlistId)
+    if (exists) {
       // Return existing ID if found (idempotent)
       return NextResponse.json({ id: playlistId })
     }
 
     // Store new playlist
-    await kv.set(`playlist:${playlistId}`, songs)
+    await storePlaylist(playlistId, songs)
 
     return NextResponse.json({ id: playlistId })
   } catch (error) {
