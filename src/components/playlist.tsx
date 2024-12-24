@@ -80,11 +80,16 @@ function PlaylistControls({ songCount, onQuickPlaylist, hasSongs }: PlaylistCont
         {hasSongs ? (
           <button
             onClick={onQuickPlaylist}
-            className="h-[18px] px-2 bg-gradient-to-b from-wonamp-button-from to-wonamp-button-to 
-                     border border-wonamp-border-dark active:from-wonamp-button-to active:to-wonamp-button-from
-                     text-wonamp-text-muted text-xs font-bold"
+            className="h-[18px] px-2 bg-gradient-to-b from-[#353545] to-[#151520] 
+                     border border-wonamp-border-dark active:from-[#151520] active:to-[#353545]
+                     text-wonamp-text-green text-xs font-bold flex items-center gap-1
+                     hover:from-[#454555] hover:to-[#252530]"
           >
-            Open Quick Playlist
+            Quick Playlist in{" "}
+            <span className="inline-flex items-center">
+              <span className="bg-wonamp-text-green text-black px-[3px] rounded-sm mr-1">▶</span>
+              <span>YouTube</span>
+            </span>
           </button>
         ) : (
           ['ADD', 'REM', 'SEL', 'MISC'].map((button) => (
