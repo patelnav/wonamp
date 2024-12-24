@@ -22,6 +22,7 @@ Welcome to **Wonamp**, a retro-inspired music playlist generator that combines t
 - [Phase Development](#phase-development)
   - [Phase One: Image and Text Mode](#phase-one-image-and-text-mode)
   - [Phase Two: Voice Mode](#phase-two-voice-mode)
+  - [Phase Two-B: Shareable Playlists](#phase-two-b-shareable-playlists)
   - [Phase Three: YouTube Account Integration](#phase-three-youtube-account-integration)
 - [Future Improvements](#future-improvements)
 
@@ -201,12 +202,38 @@ The upcoming phase will introduce:
 
 - Voice Mode: Users can input song lists via voice commands. The server will process voice inputs using Grok, extract song information, scrape YouTube, and generate an unlisted playlist accordingly.
 
+## Phase Two-B: Shareable Playlists
+
+This phase introduces playlist sharing capabilities:
+
+- [ ] **Playlist Persistence**
+
+  - [ ] Set up KV store for permanent playlist storage
+  - [ ] Implement content-based playlist ID generation (same content = same ID)
+  - [ ] Create new `/api/playlists` endpoints:
+    - [ ] GET: Retrieve playlist by ID
+    - [ ] POST: Store playlist data (idempotent - won't create duplicates)
+
+- [ ] **Client-Side Integration**
+
+  - [ ] Add URL hash handling to store (#playlist-id)
+  - [ ] Implement playlist loading from hash on page load
+  - [ ] Add error display for invalid playlist IDs
+  - [ ] Update URL after playlist generation
+
+- [ ] **Route Updates**
+  - [ ] Modify `/api/process-image` and `/api/search-text` to:
+    - [ ] Generate content-based playlist ID
+    - [ ] Store playlist in KV store
+    - [ ] Return playlist ID with response
+  - [ ] Add rate limiting for playlist access
+
 ## Phase Three: YouTube Account Integration
 
 The final phase will focus on enhancing user experience by integrating directly with YouTube accounts:
 
 - YouTube API Integration: Allow users to connect their YouTube accounts securely.
-- Playlist Creation in User Account: Enable the app to create actual playlists within the user’s YouTube account based on the provided song list.
+- Playlist Creation in User Account: Enable the app to create actual playlists within the user's YouTube account based on the provided song list.
 - Authentication: Implement OAuth 2.0 to manage secure connections between Wonamp and YouTube.
 - User Management: Allow users to view, edit, and manage their created playlists directly from Wonamp.
 
