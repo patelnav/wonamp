@@ -2,6 +2,31 @@ import { createHash } from 'crypto'
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { Song } from '@/types/song'
+import hash from 'object-hash'
+
+/**
+ * Generates a hash for an image file
+ * @param imageData The image file or blob to hash
+ * @returns A 12-character hash
+ */
+export async function generateImageHash(imageData: Blob | File): Promise<string> {
+  try {
+    // Create a hash based on file content and metadata
+    const buffer = await imageData.arrayBuffer();
+    const fileInfo = {
+      content: Array.from(new Uint8Array(buffer)),
+      size: imageData.size,
+      type: imageData.type,
+      name: 'name' in imageData ? imageData.name : undefined
+    };
+
+    return hash(fileInfo).slice(0, 12);
+  } catch (error) {
+    console.error('Error generating hash:', error);
+    // Fallback to a simple hash of size and timestamp
+    return hash({ size: imageData.size, time: Date.now() }).slice(0, 12);
+  }
+}
 
 /**
  * Generates a unique, URL-friendly ID for a song based on artist and title

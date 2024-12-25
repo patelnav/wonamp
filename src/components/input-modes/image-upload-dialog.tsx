@@ -6,6 +6,7 @@ import { useState, useRef, useEffect } from "react"
 import { useStore } from "@/lib/store/useStore"
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Loader2, Upload, X } from "lucide-react"
+import { generateImageHash } from "@/lib/utils"
 
 interface CustomWindow extends Window {
   __handleDemoFile?: () => Promise<void>;
@@ -18,14 +19,6 @@ interface ImageUploadDialogProps {
 }
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
-
-async function generateHash(file: File): Promise<string> {
-  const buffer = await file.arrayBuffer()
-  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
-  return hashHex.slice(0, 12)
-}
 
 async function checkExistingPlaylist(hash: string) {
   const response = await fetch('/api/playlist-from-hash', {
@@ -69,7 +62,7 @@ export function ImageUploadDialog({ open, onOpenChange, onSubmit }: ImageUploadD
       setPreviewUrl(URL.createObjectURL(file))
 
       // Generate hash and check for existing playlist
-      const hash = await generateHash(file)
+      const hash = await generateImageHash(file)
       const result = await checkExistingPlaylist(hash)
 
       if (result.exists) {

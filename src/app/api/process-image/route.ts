@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server'
 import { GenerationConfig, GoogleGenerativeAI, SchemaType } from '@google/generative-ai'
 import { searchYouTube } from '@/lib/youtube'
-import { generateSongID, generatePlaylistID } from '@/lib/utils'
+import { generateSongID, generatePlaylistID, generateImageHash } from '@/lib/utils'
 import { Song } from '@/types/song'
 import { z } from 'zod'
 import { songArraySchema } from '@/lib/validations/song'
 import { storePlaylist, getPlaylist, getPlaylistFromImageHash, storeImageHashToPlaylist } from '@/lib/redis'
-import { createHash } from 'crypto'
 
 const MAX_SONG_COUNT = 30
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
@@ -43,11 +42,6 @@ const generationConfig: GenerationConfig = {
       }
     }
   },
-}
-
-async function generateImageHash(imageData: Blob): Promise<string> {
-  const buffer = Buffer.from(await imageData.arrayBuffer())
-  return createHash('sha256').update(buffer).digest('hex').slice(0, 12)
 }
 
 async function extractSongsFromImage(imageData: Blob): Promise<string[]> {
