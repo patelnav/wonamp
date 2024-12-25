@@ -23,6 +23,7 @@ Welcome to **Wonamp**, a retro-inspired music playlist generator that combines t
   - [Phase One: Image and Text Mode](#phase-one-image-and-text-mode)
   - [Phase Two: Voice Mode](#phase-two-voice-mode)
   - [Phase Two-B: Shareable Playlists](#phase-two-b-shareable-playlists)
+  - [Phase Two-C: Interactive Demo Experience](#phase-two-c-interactive-demo-experience)
   - [Phase Three: YouTube Account Integration](#phase-three-youtube-account-integration)
 - [Future Improvements](#future-improvements)
 
@@ -225,6 +226,36 @@ This phase introduces playlist sharing capabilities:
   - [x] Modify `/api/search-text` to store generated playlists
   - [x] Modify `/api/process-image` to store generated playlists
   - [x] Add error handling for invalid playlist IDs
+
+## Phase Two-C: Interactive Demo Experience
+
+This phase focuses on creating a simple, automated demo of the image-to-playlist workflow:
+
+- [ ] **Demo Implementation**
+
+  - Add "Try Demo" button that only appears when no playlist is loaded
+  - Create automated demo sequence with 1.5s delay between actions:
+    1. Animate visible cursor to image upload button
+    2. Show cursor click animation
+    3. Simulate selection of pre-loaded `public/californication.jpg`
+    4. Animate cursor to submit button and click
+  - Ensure demo works on both desktop and mobile interfaces
+  - Show cursor movement and click animations
+  - Implement smooth cursor motion between actions
+
+- [ ] **Technical Requirements**
+
+  - Implement demo state management
+  - Create custom cursor component with click animation
+  - Handle mobile-specific interaction patterns
+  - Ensure demo button visibility logic works with URL hash state
+  - Add proper cleanup after demo completion
+  - Implement smooth cursor movement animations
+
+- [ ] **Asset Management**
+  - Verify `public/californication.jpg` is properly loaded
+  - Add fallback handling if demo image fails to load
+  - Create cursor assets (if needed)
 
 ## Phase Three: YouTube Account Integration
 
