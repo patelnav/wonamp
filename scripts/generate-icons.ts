@@ -2,54 +2,147 @@ import sharp from 'sharp'
 import fs from 'fs'
 import path from 'path'
 
-const ICON_SIZES = [16, 32, 48, 64, 128, 192, 512]
 
 // Create an SVG icon with the given size
 function createSvgIcon(size: number) {
-  const padding = size * 0.1 // 10% padding
-  const innerSize = size - (padding * 2)
-  const textSize = size * 0.4
-  const strokeWidth = size * 0.02
+  const squareSize = size * 0.65 // Make square 65% of canvas
+  const wWidth = size * 0.55 // W width is 55% of canvas
+  const wHeight = size * 0.4 // W height is 40% of canvas
+  const shadowBlur = size * 0.05
+  const shadowOffset = size * 0.02
 
   return Buffer.from(`
     <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" style="stop-color:#3B3B4F"/>
-          <stop offset="100%" style="stop-color:#1D1D29"/>
-        </linearGradient>
-        <filter id="shadow">
-          <feDropShadow dx="${size * 0.02}" dy="${size * 0.02}" stdDeviation="${size * 0.01}" flood-opacity="0.5"/>
+        <filter id="squareShadow">
+          <feDropShadow dx="${shadowOffset}" dy="${shadowOffset}" stdDeviation="${shadowBlur}" flood-opacity="0.5"/>
+        </filter>
+        <filter id="wShadow">
+          <feDropShadow dx="${shadowOffset}" dy="${shadowOffset}" stdDeviation="${shadowBlur}" flood-opacity="0.5"/>
         </filter>
       </defs>
-      <rect width="100%" height="100%" fill="url(#bg)"/>
-      <g transform="rotate(45, ${size / 2}, ${size / 2})">
+
+      <!-- Rotated white square with shadow -->
+      <g transform="translate(${size / 2}, ${size / 2}) rotate(45)">
         <rect 
-          x="${padding}" 
-          y="${padding}" 
-          width="${innerSize}" 
-          height="${innerSize}" 
-          fill="black"
-          stroke="#DAA520"
-          stroke-width="${strokeWidth}"
-          filter="url(#shadow)"
+          x="${-squareSize / 2}"
+          y="${-squareSize / 2}"
+          width="${squareSize}"
+          height="${squareSize}"
+          fill="white"
+          stroke="#333333"
+          stroke-width="${size * 0.01}"
+          filter="url(#squareShadow)"
         />
       </g>
-      <g transform="rotate(-45, ${size / 2}, ${size / 2})">
-        <text
-          x="50%"
-          y="50%"
-          font-family="Arial"
-          font-size="${textSize}"
-          fill="#00FF00"
-          text-anchor="middle"
-          dominant-baseline="middle"
-          font-weight="bold"
-          filter="url(#shadow)"
-        >W</text>
+
+      <!-- Orange W with shadow -->
+      <g transform="translate(${size / 2}, ${size / 2}) rotate(-45)">
+        <!-- Shadow layers -->
+        <path 
+          d="M ${-wWidth / 2} ${-wHeight / 2}
+             L ${-wWidth / 4} ${wHeight / 2}
+             L 0 ${-wHeight / 4}
+             L ${wWidth / 4} ${wHeight / 2}
+             L ${wWidth / 2} ${-wHeight / 2}"
+          fill="rgba(0, 0, 0, 0.5)"
+          transform="translate(${shadowOffset}, ${shadowOffset})"
+        />
+        <path 
+          d="M ${-wWidth / 2} ${-wHeight / 2}
+             L ${-wWidth / 4} ${wHeight / 2}
+             L 0 ${-wHeight / 4}
+             L ${wWidth / 4} ${wHeight / 2}
+             L ${wWidth / 2} ${-wHeight / 2}"
+          fill="rgba(0, 0, 0, 0.5)"
+          transform="translate(${shadowOffset * 0.75}, ${shadowOffset * 0.75})"
+        />
+        <path 
+          d="M ${-wWidth / 2} ${-wHeight / 2}
+             L ${-wWidth / 4} ${wHeight / 2}
+             L 0 ${-wHeight / 4}
+             L ${wWidth / 4} ${wHeight / 2}
+             L ${wWidth / 2} ${-wHeight / 2}"
+          fill="rgba(0, 0, 0, 0.5)"
+          transform="translate(${shadowOffset * 0.5}, ${shadowOffset * 0.5})"
+        />
+
+        <!-- Dark orange outline -->
+        <path 
+          d="M ${-wWidth / 2} ${-wHeight / 2}
+             L ${-wWidth / 4} ${wHeight / 2}
+             L 0 ${-wHeight / 4}
+             L ${wWidth / 4} ${wHeight / 2}
+             L ${wWidth / 2} ${-wHeight / 2}"
+          fill="#CC7700"
+          transform="translate(${size * 0.005}, ${size * 0.005})"
+        />
+
+        <!-- Main orange W -->
+        <path 
+          d="M ${-wWidth / 2} ${-wHeight / 2}
+             L ${-wWidth / 4} ${wHeight / 2}
+             L 0 ${-wHeight / 4}
+             L ${wWidth / 4} ${wHeight / 2}
+             L ${wWidth / 2} ${-wHeight / 2}"
+          fill="#FF9900"
+        />
+
+        <!-- Highlight -->
+        <path 
+          d="M ${-wWidth / 2} ${-wHeight / 2}
+             L ${-wWidth / 4} ${wHeight / 2}
+             L 0 ${-wHeight / 4}
+             L ${wWidth / 4} ${wHeight / 2}
+             L ${wWidth / 2} ${-wHeight / 2}"
+          fill="#FFBB33"
+          transform="translate(${-size * 0.005}, ${-size * 0.005}) scale(0.9)"
+          transform-origin="center"
+        />
       </g>
     </svg>
   `)
+}
+
+async function generateSplash(): Promise<Buffer> {
+  const size = 2048
+  const iconSize = 512
+  const iconX = (size - iconSize) / 2
+  const iconY = (size - iconSize) / 2 - 100 // Move icon up a bit to make room for text
+
+  // Create a 2048x2048 splash screen
+  const svg = Buffer.from(`
+    <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100%" height="100%" fill="#000000"/>
+      <g transform="translate(${iconX}, ${iconY})">
+        ${createSvgIcon(iconSize).toString().replace(/<\\?xml.*\\?>/, '')}
+      </g>
+      <text
+        x="${size / 2}"
+        y="${iconY + iconSize + 100}"
+        font-family="Arial"
+        font-size="64"
+        font-weight="bold"
+        fill="white"
+        text-anchor="middle"
+        dominant-baseline="middle"
+      >WONAMP</text>
+    </svg>
+  `)
+
+  return await sharp(svg).png().toBuffer()
+}
+
+async function generateFavicon(): Promise<Buffer> {
+  // Create multiple sizes for the favicon
+  const sizes = [16, 32, 48]
+  const buffers = await Promise.all(sizes.map(async size => {
+    const svg = createSvgIcon(size)
+    return await sharp(svg).png().toBuffer()
+  }))
+
+  // Use the 32x32 size for favicon
+  return buffers[1]
 }
 
 async function generateIcons() {
@@ -60,38 +153,23 @@ async function generateIcons() {
     fs.mkdirSync(publicDir)
   }
 
-  // Generate icons of different sizes
-  await Promise.all(ICON_SIZES.map(async (size) => {
+  // Generate PWA icons
+  const sizes = [192, 512]
+  await Promise.all(sizes.map(async size => {
     const svg = createSvgIcon(size)
-    const iconBuffer = await sharp(svg)
-      .png()
-      .toBuffer()
-
-    if (size === 192) {
-      fs.writeFileSync(path.join(publicDir, 'icon-192.png'), iconBuffer)
-      console.log('Generated icon-192.png')
-    } else if (size === 512) {
-      fs.writeFileSync(path.join(publicDir, 'icon-512.png'), iconBuffer)
-      console.log('Generated icon-512.png')
-    }
+    const buffer = await sharp(svg).png().toBuffer()
+    fs.writeFileSync(path.join(publicDir, `icon-${size}.png`), buffer)
+    console.log(`Generated icon-${size}.png`)
   }))
 
-  // Generate favicon.ico (using 32x32 size)
-  const faviconBuffer = await sharp(createSvgIcon(32))
-    .resize(32, 32)
-    .png()
-    .toBuffer()
-
+  // Generate favicon.ico
+  const faviconBuffer = await generateFavicon()
   fs.writeFileSync(path.join(publicDir, 'favicon.ico'), faviconBuffer)
   console.log('Generated favicon.ico')
 
   // Generate splash screen
-  const splashSvg = createSvgIcon(2048)
-  const splash = await sharp(splashSvg)
-    .png()
-    .toBuffer()
-
-  fs.writeFileSync(path.join(publicDir, 'splash.png'), splash)
+  const splashBuffer = await generateSplash()
+  fs.writeFileSync(path.join(publicDir, 'splash.png'), splashBuffer)
   console.log('Generated splash.png')
 }
 
