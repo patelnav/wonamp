@@ -34,6 +34,7 @@ export function InputModeButtons({ onTextClick, onImageClick }: InputModeButtons
         onClick={onImageClick}
         disabled={isProcessing}
         className={buttonClasses}
+        data-demo="upload-button"
       >
         Image
       </button>

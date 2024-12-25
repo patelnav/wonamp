@@ -5,6 +5,10 @@ import { useStore } from "@/lib/store/useStore"
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Loader2, Upload, X } from "lucide-react"
 
+interface CustomWindow extends Window {
+  __handleDemoFile?: () => Promise<void>;
+}
+
 interface ImageUploadDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -81,6 +85,30 @@ export function ImageUploadDialog({ open, onOpenChange, onSubmit }: ImageUploadD
     }
   }
 
+  // Handle demo file selection
+  const handleDemoFile = async () => {
+    try {
+      const response = await fetch('/californication.jpg');
+      const blob = await response.blob();
+      const file = new File([blob], 'californication.jpg', { type: 'image/jpeg' });
+      await processFile(file);
+    } catch (error) {
+      console.error('Error loading demo file:', error);
+    }
+  };
+
+  // Expose handleDemoFile to window for demo access
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as CustomWindow).__handleDemoFile = handleDemoFile;
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        delete (window as CustomWindow).__handleDemoFile;
+      }
+    };
+  }, []);
+
   // Handle clipboard paste
   useEffect(() => {
     if (!open) return
@@ -153,6 +181,7 @@ export function ImageUploadDialog({ open, onOpenChange, onSubmit }: ImageUploadD
         </DialogDescription>
         <div
           ref={dropZoneRef}
+          data-demo="drop-zone"
           className={`w-full h-64 border-2 border-dashed rounded-lg 
                    ${dragActive ? 'border-wonamp-text-green bg-black/10' : 'border-wonamp-border'} 
                    flex flex-col items-center justify-center gap-4 relative
@@ -222,6 +251,28 @@ export function ImageUploadDialog({ open, onOpenChange, onSubmit }: ImageUploadD
                      disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
+          </button>
+          <button
+            onClick={() => {
+              if (previewUrl) {
+                processFile(new File([previewUrl], 'californication.jpg', { type: 'image/jpeg' }));
+              }
+            }}
+            disabled={isProcessing || !previewUrl}
+            data-demo="submit-button"
+            className="min-w-[100px] px-4 h-8 bg-gradient-to-b from-[#777790] to-[#3B3B4F] 
+                     border border-[#1D1D29] active:from-[#3B3B4F] active:to-[#777790]
+                     text-[#1D1D29] font-bold relative flex items-center justify-center gap-2
+                     disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isProcessing ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin text-[#1D1D29]" />
+                <span className="text-[#1D1D29]">Processing...</span>
+              </>
+            ) : (
+              "Submit"
+            )}
           </button>
         </div>
       </DialogContent>

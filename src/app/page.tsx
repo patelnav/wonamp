@@ -1,6 +1,7 @@
 import { TitleBar } from "@/components/title-bar"
 import { Player } from "@/components/player"
 import { Playlist } from "@/components/playlist"
+import { DemoButton } from "@/components/DemoButton"
 
 export default function Home() {
   return (
@@ -18,6 +19,7 @@ export default function Home() {
           </div>
         </div>
       </div>
+      <DemoButton />
     </div>
   )
 }
