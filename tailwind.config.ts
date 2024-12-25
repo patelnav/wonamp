@@ -9,6 +9,15 @@ export default {
   ],
   theme: {
     extend: {
+      keyframes: {
+        marquee: {
+          '0%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-100%)' }
+        }
+      },
+      animation: {
+        marquee: 'marquee 30s linear infinite'
+      },
       colors: {
         wonamp: {
           bg: '#3B3B4F',

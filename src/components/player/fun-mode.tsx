@@ -23,7 +23,14 @@ export function FunMode() {
         {/* Track title: text-xs (12px) + p-2 top/bottom (16px) + border (2px) = 30px */}
         <div className="min-h-[30px] [&>*]:h-[30px]">
           <div className="bg-black border border-wonamp-border p-2 text-wonamp-text-green font-mono text-xs leading-none">
-            <span className="opacity-70">4.</span> Track 3 <span className="opacity-70">(5:04)</span>
+            <div className="inline-flex overflow-hidden whitespace-nowrap mx-2 w-[200px]">
+              <div className="animate-marquee inline-block pr-4">
+                Turn any songs into a YouTube playlist • Just paste a list or upload a photo • Get instant YouTube playlists • That&apos;s it! •
+              </div>
+              <div className="animate-marquee inline-block pr-4" aria-hidden={true}>
+                Turn any songs into a YouTube playlist • Just paste a list or upload a photo • Get instant YouTube playlists • That&apos;s it! •
+              </div>
+            </div>
           </div>
         </div>
         <TrackControls />
