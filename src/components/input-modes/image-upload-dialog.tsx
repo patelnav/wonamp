@@ -72,8 +72,9 @@ export function ImageUploadDialog({ open, onOpenChange, onSubmit }: ImageUploadD
       const result = await checkExistingPlaylist(hash)
 
       if (result.exists) {
-        // Use existing playlist
+        // Use existing playlist and update URL hash
         useStore.setState({ songs: result.songs, playlistId: result.playlistId })
+        window.history.replaceState(null, '', `#${result.playlistId}`)
         onOpenChange(false)
         return
       }

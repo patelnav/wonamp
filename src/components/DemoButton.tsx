@@ -1,21 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useDemo } from '@/hooks/useDemo';
 import { DemoCursor } from './DemoCursor';
 import { Upload } from 'lucide-react';
+import { useStore } from '@/lib/store/useStore';
 
 export function DemoButton() {
-  const [isVisible, setIsVisible] = useState(true);
+  const playlistId = useStore((state) => state.playlistId);
   const { isRunning, targetElement, isClicking, isDragging, startDemo } = useDemo();
 
-  // Hide button when URL has a playlist hash
-  useEffect(() => {
-    const hasPlaylist = window.location.hash.length > 0;
-    setIsVisible(!hasPlaylist);
-  }, []);
-
-  if (!isVisible) return null;
+  // Hide button when a playlist is loaded
+  if (playlistId) return null;
 
   return (
     <>
@@ -37,7 +32,6 @@ export function DemoButton() {
           />
         </td>
       </tr>
-
     </>
   );
 } 
