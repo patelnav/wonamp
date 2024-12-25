@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client"
 
 import { useState, useRef, useEffect } from "react"
@@ -91,7 +92,7 @@ export function ImageUploadDialog({ open, onOpenChange, onSubmit }: ImageUploadD
       const response = await fetch('/californication.jpg');
       const blob = await response.blob();
       const file = new File([blob], 'californication.jpg', { type: 'image/jpeg' });
-      await processFile(file);
+      processFile(file);
     } catch (error) {
       console.error('Error loading demo file:', error);
     }

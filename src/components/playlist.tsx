@@ -2,6 +2,7 @@
 
 import { useStore } from "@/lib/store/useStore"
 import { Song } from "@/types/song"
+import { DemoButton } from './DemoButton';
 
 // Header Component
 function PlaylistHeader() {
@@ -39,9 +40,7 @@ function SongList({ songs, onSongClick }: SongListProps) {
       <table className="w-full border-collapse bg-black table-fixed">
         <tbody>
           {songs.length === 0 ? (
-            <tr>
-              <td className="h-full bg-black" />
-            </tr>
+            <DemoButton />
           ) : (
             songs.map((song, index) => (
               <tr

@@ -59,19 +59,6 @@ export function useDemo() {
 
     const sequence = async () => {
       try {
-        // Start from top right corner
-        // const startPosition = { x: 0, y: 0 };
-        // moveToElement({
-        //   getBoundingClientRect: () => ({
-        //     left: startPosition.x - 50,
-        //     top: startPosition.y + 100,
-        //     width: 100,
-        //     height: 100
-        //   })
-        // } as HTMLElement);
-
-        // await new Promise(resolve => setTimeout(resolve, 1000));
-
         // Step 1: Move to and click the image button
         const imageButton = document.querySelector('[data-demo="upload-button"]');
         if (!(imageButton instanceof HTMLElement)) {
@@ -101,18 +88,16 @@ export function useDemo() {
         moveToElement(dropZone);
         await new Promise(resolve => setTimeout(resolve, 1500));
 
-        // Drop the file
+        // Step 4: Drop the file and process it
         stopDragging();
         simulateClick();
-
-        // Step 4: Process the file
         console.log('Processing file');
         const handleDemoFile = (window as CustomWindow).__handleDemoFile;
         if (handleDemoFile) {
-          await handleDemoFile();
+          handleDemoFile();
         }
 
-        // End demo after file is processed
+        // End demo
         await new Promise(resolve => setTimeout(resolve, 1500));
         stopDemo();
       } catch (error) {
