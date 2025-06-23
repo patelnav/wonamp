@@ -5,6 +5,7 @@ import { useStore } from "@/lib/store/useStore"
 interface InputModeButtonsProps {
   onTextClick: () => void
   onImageClick: () => void
+  onCameraClick: () => void
 }
 
 const buttonClasses = `
@@ -18,7 +19,7 @@ const buttonClasses = `
   disabled:opacity-50 disabled:cursor-not-allowed
 `
 
-export function InputModeButtons({ onTextClick, onImageClick }: InputModeButtonsProps) {
+export function InputModeButtons({ onTextClick, onImageClick, onCameraClick }: InputModeButtonsProps) {
   const isProcessing = useStore((state) => state.isProcessing)
 
   return (
@@ -39,11 +40,11 @@ export function InputModeButtons({ onTextClick, onImageClick }: InputModeButtons
         Image
       </button>
       <button
-        onClick={() => alert("Coming soon!")}
+        onClick={onCameraClick}
         disabled={isProcessing}
         className={buttonClasses}
       >
-        Voice
+        Camera
       </button>
     </div>
   )
