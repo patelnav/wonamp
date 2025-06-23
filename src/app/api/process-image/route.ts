@@ -21,7 +21,7 @@ const requestSchema = z.object({
 // Initialize Gemini with configuration
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '')
 const model = genAI.getGenerativeModel({
-  model: "gemini-2.0-flash-exp",
+  model: "gemini-2.0-flash-lite",
   systemInstruction: "Extract a list of songs from this image. Format each song as \"Artist - Song Title\". \n    If you can't determine the artist, just return the song title. Return only the list of songs, one per line.\n    If you're not confident about a song name, skip it",
 })
 
